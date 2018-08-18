@@ -1,0 +1,26 @@
+version: '3'
+services:
+
+    web:
+        image: boichenko/phonebook:latest
+        deploy:
+            restart_policy:
+                condition: on-failure
+        ports:
+            - "8080:8080"
+
+    db:
+        image: mysql:5.7
+        container_name: phonebook_db
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        environment:
+            - MYSQL_ROOT_PASSWORD=root_secret_password
+            - MYSQL_DATABASE=phonebook
+            - MYSQL_USER=skywalker
+            - MYSQL_PASSWORD=qwerty
+        volumes:
+            - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+        ports:
+            - "3306:3306"
+            - "33060:33060"
