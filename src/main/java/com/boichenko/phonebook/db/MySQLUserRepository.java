@@ -19,6 +19,7 @@ public class MySQLUserRepository implements UserRepository {
     public User getUser(String userName) {
         try {
             return jdbcTemplate.queryForObject("SELECT user_id, user_name, password FROM user WHERE user_name = ?",
+                    new Object[]{userName},
                     (rs, rowNum) -> {
                         User user = new User();
                         user.setId(rs.getInt("user_id"));
@@ -33,7 +34,7 @@ public class MySQLUserRepository implements UserRepository {
 
     @Override
     public void registerUser(User user) {
-        jdbcTemplate.update("INSERT INTO user (user_name, password) VALUES (?, ?)");
+        jdbcTemplate.update("INSERT INTO user (user_name, password) VALUES (?, ?)", user.getUserName(), user.getPassword());
     }
 
 }

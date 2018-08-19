@@ -118,10 +118,15 @@ public class AuthService {
         return keyPair;
     }
 
-    private String createMD5(String source) {
+    private static String createMD5(String source) {
         try {
-            byte[] md5Value = MessageDigest.getInstance("MD5").digest(source.getBytes());
-            return new String(md5Value);
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            byte[] md5Value = messageDigest.digest(source.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte aMd5Value : md5Value) {
+                sb.append(Integer.toString((aMd5Value & 0xff) + 0x100, 16).substring(1));
+            }
+            return sb.toString();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
