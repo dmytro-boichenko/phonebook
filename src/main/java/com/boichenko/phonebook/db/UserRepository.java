@@ -4,7 +4,7 @@ import com.boichenko.phonebook.model.User;
 
 public interface UserRepository {
 
-    boolean authenticateUser(User user);
+    User getUser(String userName);
 
-    boolean registerUser(User user);
+    void registerUser(User user);
 }

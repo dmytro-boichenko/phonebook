@@ -10,14 +10,14 @@ public interface ContactsRepository {
 
     List<Contact> getContacts(User user);
 
+    Contact getContact(User user, int contactId);
+
     int createContact(User user, Contact contact);
 
     void updateContact(User user, Contact contact);
 
     void deleteContact(User user, Contact contact);
 
-    void addPhoneToContact(Contact contact, Phone phone);
-
-    List<Phone> getPhonesForContact(Contact contact);
+    void addPhoneToContact(User user, Contact contact, Phone phone);
 
 }

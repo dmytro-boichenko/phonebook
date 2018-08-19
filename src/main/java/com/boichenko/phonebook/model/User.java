@@ -3,7 +3,8 @@ package com.boichenko.phonebook.model;
 public class User {
 
     private int id;
-    private int password;
+    private String userName;
+    private String password;
 
     public int getId() {
         return id;
@@ -13,11 +14,19 @@ public class User {
         this.id = id;
     }
 
-    public int getPassword() {
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(int password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 }

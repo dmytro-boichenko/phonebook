@@ -23,6 +23,11 @@ public class ContactsServiceImpl implements ContactsService {
     }
 
     @Override
+    public Contact getContact(User user, int contactId) {
+        return contactsRepository.getContact(user, contactId);
+    }
+
+    @Override
     public int createContact(User user, Contact contact) {
         return contactsRepository.createContact(user, contact);
     }
@@ -38,7 +43,8 @@ public class ContactsServiceImpl implements ContactsService {
     }
 
     @Override
-    public void addPhoneToContact(User user, Contact contact, Phone phone) {
-        contactsRepository.addPhoneToContact(contact, phone);
+    public void addPhoneToContact(User user, int contactId, Phone phone) {
+        Contact contact = contactsRepository.getContact(user, contactId);
+        contactsRepository.addPhoneToContact(user, contact, phone);
     }
 }

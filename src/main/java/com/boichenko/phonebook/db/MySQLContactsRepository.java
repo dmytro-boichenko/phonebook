@@ -1,11 +1,14 @@
 package com.boichenko.phonebook.db;
 
+import com.boichenko.phonebook.exception.NotFoundException;
 import com.boichenko.phonebook.model.Contact;
 import com.boichenko.phonebook.model.Phone;
 import com.boichenko.phonebook.model.User;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,6 +35,17 @@ public class MySQLContactsRepository implements ContactsRepository {
     }
 
     @Override
+    public Contact getContact(User user, int contactId) {
+        try {
+            Object[] args = {user.getId(), contactId};
+            return jdbcTemplate.queryForObject("SELECT contact_id, user_id, first_name, last_name " +
+                    "FROM contact WHERE user_id = ? AND contact_id = ?", args, new ContactRowMapper());
+        } catch (IncorrectResultSizeDataAccessException e) {
+            throw new NotFoundException("Contact not found");
+        }
+    }
+
+    @Override
     @Transactional
     public int createContact(User user, Contact contact) {
         jdbcTemplate.update("INSERT INTO contact (user_id, first_name, last_name) VALUES (?, ?, ?)",
@@ -42,31 +56,36 @@ public class MySQLContactsRepository implements ContactsRepository {
             throw new RuntimeException("Contact wasn't added");
 
         contact.setId(contactId);
-        contact.getPhones().forEach(p -> addPhoneToContact(contact, p));
+        contact.getPhones().forEach(p -> addPhoneToContact(user, contact, p));
         return contactId;
     }
 
     @Override
     public void updateContact(User user, Contact contact) {
-        jdbcTemplate.update("UPDATE contact SET first_name = ?, last_name = ? WHERE contact_id = ?",
-                contact.getFirstName(), contact.getLastName(), contact.getId());
+        Contact dbContact = getContact(user, contact.getId());
+        String firstName = StringUtils.isEmpty(contact.getFirstName()) ? dbContact.getFirstName() : contact.getFirstName();
+        String lastName = StringUtils.isEmpty(contact.getLastName()) ? dbContact.getLastName() : contact.getLastName();
+        jdbcTemplate.update("UPDATE contact SET first_name = ?, last_name = ? WHERE contact_id = ? AND user_id = ?",
+                firstName, lastName, contact.getId(), user.getId());
     }
 
     @Override
     public void deleteContact(User user, Contact contact) {
-        jdbcTemplate.update("DELETE FROM contact WHERE contact_id = ?", contact.getId());
+        jdbcTemplate.update("DELETE FROM contact WHERE contact_id = ? AND user_id = ?", contact.getId(), user.getId());
     }
 
     @Override
-    public void addPhoneToContact(Contact contact, Phone phone) {
+    public void addPhoneToContact(User user, Contact contact, Phone phone) {
+        Contact dbContact = getContact(user, contact.getId());
         jdbcTemplate.update("INSERT INTO phone (contact_id, phone) VALUES (?, ?)",
-                contact.getId(), phone.getPhone());
+                dbContact.getId(), phone.getPhone());
     }
 
-    @Override
-    public List<Phone> getPhonesForContact(Contact contact) {
-        return jdbcTemplate.query("SELECT phone_id, contact_id, phone FROM phone WHERE contact_id = ?", new PhoneRowMapper());
+    private List<Phone> getPhonesForContact(Contact contact) {
+        Object[] args = {contact.getId()};
+        return jdbcTemplate.query("SELECT phone_id, contact_id, phone FROM phone WHERE contact_id = ?", args, new PhoneRowMapper());
     }
+
 
     private static class ContactRowMapper implements RowMapper<Contact> {
 
