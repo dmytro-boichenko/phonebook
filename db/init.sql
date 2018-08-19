@@ -2,8 +2,7 @@ CREATE DATABASE IF NOT EXISTS phonebook;
 
 CREATE TABLE IF NOT EXISTS phonebook.user (
   user_id INTEGER(10) NOT NULL AUTO_INCREMENT,
-  first_name VARCHAR(40) NOT NULL,
-  last_name VARCHAR(40) NOT NULL,
+  user_name VARCHAR (40) NOT NULL,
   password VARCHAR (128) NOT NULL,
   PRIMARY KEY (user_id)
 );
