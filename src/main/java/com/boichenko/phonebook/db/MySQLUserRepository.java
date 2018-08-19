@@ -1,8 +1,9 @@
 package com.boichenko.phonebook.db;
 
 import com.boichenko.phonebook.exception.NotFoundException;
+import com.boichenko.phonebook.exception.UserExistException;
 import com.boichenko.phonebook.model.User;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -27,14 +28,21 @@ public class MySQLUserRepository implements UserRepository {
                         user.setPassword(rs.getString("password"));
                         return user;
                     });
-        } catch (IncorrectResultSizeDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("User '" + userName + "' wasn't found");
         }
     }
 
     @Override
     public void registerUser(User user) {
-        jdbcTemplate.update("INSERT INTO user (user_name, password) VALUES (?, ?)", user.getUserName(), user.getPassword());
+        try {
+            getUser(user.getUserName());
+            throw new UserExistException("User '" + user.getUserName() + "' already registered");
+        } catch (NotFoundException e) {
+            // normal case.
+            jdbcTemplate.update("INSERT INTO user (user_name, password) VALUES (?, ?)",
+                    user.getUserName(), user.getPassword());
+        }
     }
 
 }

@@ -104,7 +104,7 @@ public class AuthService {
             try {
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
                 InputStream inputStream = new ClassPathResource("keystore.jks").getInputStream();
-                keyStore.load(inputStream, "password".toCharArray());
+                keyStore.load(inputStream, "qwerty".toCharArray());
 
                 RSAPrivateKey privateKey = (RSAPrivateKey) keyStore.getKey(TOKEN_ALIAS, "qwerty".toCharArray());
                 Certificate cert = keyStore.getCertificate(TOKEN_ALIAS);
