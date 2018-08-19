@@ -25,8 +25,9 @@ public class MySQLContactsRepository implements ContactsRepository {
 
     @Override
     public List<Contact> getContacts(User user) {
+        Object[] args = {user.getId()};
         List<Contact> contacts = jdbcTemplate.query("SELECT contact_id, user_id, first_name, last_name " +
-                "FROM contact WHERE user_id = ?", new ContactRowMapper());
+                "FROM contact WHERE user_id = ?", args, new ContactRowMapper());
         contacts.forEach(c -> {
             List<Phone> phones = this.getPhonesForContact(c);
             c.setPhones(phones);
@@ -38,8 +39,11 @@ public class MySQLContactsRepository implements ContactsRepository {
     public Contact getContact(User user, int contactId) {
         try {
             Object[] args = {user.getId(), contactId};
-            return jdbcTemplate.queryForObject("SELECT contact_id, user_id, first_name, last_name " +
+            Contact contact = jdbcTemplate.queryForObject("SELECT contact_id, user_id, first_name, last_name " +
                     "FROM contact WHERE user_id = ? AND contact_id = ?", args, new ContactRowMapper());
+            List<Phone> phones = this.getPhonesForContact(contact);
+            contact.setPhones(phones);
+            return contact;
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new NotFoundException("Contact not found");
         }

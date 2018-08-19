@@ -21,8 +21,7 @@ import java.security.cert.CertificateException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.sql.Date;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 @Service
@@ -77,7 +76,7 @@ public class AuthService {
                     .withIssuer(TOKEN_ALIAS)
                     .withClaim("user", user.getUserName())
                     .withClaim("user_id", user.getId())
-                    .withExpiresAt(Date.from(LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.UTC)))
+                    .withExpiresAt(Date.from(ZonedDateTime.now().plusHours(1).toInstant()))
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("JWT creation error");
@@ -91,8 +90,7 @@ public class AuthService {
         try {
             Algorithm algorithm = Algorithm.RSA256(publicKey, privateKey);
             JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer("auth0")
-                    .build(); //Reusable verifier instance
+                    .build();
             return verifier.verify(token);
         } catch (JWTVerificationException exception) {
             throw new TokenVerificationException("Token verification failed");
@@ -102,11 +100,12 @@ public class AuthService {
     private KeyPair getKeyPair() {
         if (keyPair == null) {
             try {
+                char[] password = "qwerty".toCharArray();
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
                 InputStream inputStream = new ClassPathResource("keystore.jks").getInputStream();
-                keyStore.load(inputStream, "qwerty".toCharArray());
+                keyStore.load(inputStream, password);
 
-                RSAPrivateKey privateKey = (RSAPrivateKey) keyStore.getKey(TOKEN_ALIAS, "qwerty".toCharArray());
+                RSAPrivateKey privateKey = (RSAPrivateKey) keyStore.getKey(TOKEN_ALIAS, password);
                 Certificate cert = keyStore.getCertificate(TOKEN_ALIAS);
                 RSAPublicKey publicKey = (RSAPublicKey) cert.getPublicKey();
                 keyPair = new KeyPair(publicKey, privateKey);
