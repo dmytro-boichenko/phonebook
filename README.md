@@ -11,6 +11,19 @@ User password is kept in DataBase as MD5 hashed string. Password validation perf
 ## 1. Build
 
 ### 1.1 Run Maven build
+#### 1.1.1 Linux 
+For linux environment you have to give required permissions for `mvnw` binary
+```text
+    chmod 0744 mvnw
+```
+
+Build application
+```text
+    ./mvnw clean install
+```
+
+#### 1.1.2 Windows 
+Build application
 ```text
     mvnw clean install
 ```
