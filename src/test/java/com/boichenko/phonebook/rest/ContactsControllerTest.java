@@ -56,8 +56,7 @@ public class ContactsControllerTest {
         contact.setPhones(Collections.emptyList());
         when(contactsServiceMock.getContacts(user)).thenReturn(Collections.singletonList(contact));
 
-        mockMvc.perform(get("/contacts")
-                .header("Authorization", "some_auth_header"))
+        mockMvc.perform(get("/contacts").header("Authorization", "some_auth_header"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath("$.[0].id").value("456"))
